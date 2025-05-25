@@ -14,6 +14,8 @@ interface DoctorListingProps {
   specialty?: string;
 }
 
+
+
 export default function DoctorListing({ specialty = 'General Physician' }: DoctorListingProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -38,7 +40,7 @@ export default function DoctorListing({ specialty = 'General Physician' }: Docto
 
   // Generate query string from search params
   const generateQueryString = () => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams?.toString() || '');
     if (specialty) {
       params.set('specialization', specialty);
     }
@@ -80,172 +82,11 @@ export default function DoctorListing({ specialty = 'General Physician' }: Docto
     fetchDoctors();
   }, [searchParams]);
 
-  // Sample mock data for initial render (this would normally come from the API)
-  useEffect(() => {
-    // This is just for demonstration purposes until backend is connected
-    const mockDoctors = [
-      {
-        _id: '1',
-        name: 'Dr. Samantha Wilson',
-        specializations: ['General Physician', 'Internal Medicine'],
-        primarySpecialization: 'General Physician',
-        qualifications: ['MBBS', 'MD (General Medicine)'],
-        experience: 15,
-        gender: 'female',
-        languages: ['English', 'Hindi'],
-        clinics: [
-          {
-            name: 'Apollo Clinic',
-            address: '123 Main Street',
-            city: 'Delhi',
-            state: 'Delhi',
-            pincode: '110001',
-            consultationFee: 800
-          }
-        ],
-        availability: [
-          {
-            day: 'Monday',
-            slots: [
-              {
-                startTime: '09:00',
-                endTime: '13:00'
-              }
-            ]
-          }
-        ],
-        about: 'Dr. Wilson is a senior consultant with over 15 years of experience in treating general medical conditions.',
-        profileImage: 'https://images.pexels.com/photos/5452201/pexels-photo-5452201.jpeg?auto=compress&cs=tinysrgb&w=150',
-        rating: 4.8,
-        reviewsCount: 235,
-        isConsultOnline: true,
-        isHomeVisit: false
-      },
-      {
-        _id: '2',
-        name: 'Dr. Rajesh Kumar',
-        specializations: ['General Physician', 'Diabetology'],
-        primarySpecialization: 'General Physician',
-        qualifications: ['MBBS', 'DNB (General Medicine)'],
-        experience: 10,
-        gender: 'male',
-        languages: ['English', 'Hindi', 'Tamil'],
-        clinics: [
-          {
-            name: 'Apollo Hospital',
-            address: '456 Garden Road',
-            city: 'Delhi',
-            state: 'Delhi',
-            pincode: '110002',
-            consultationFee: 700
-          }
-        ],
-        availability: [
-          {
-            day: 'Tuesday',
-            slots: [
-              {
-                startTime: '10:00',
-                endTime: '18:00'
-              }
-            ]
-          }
-        ],
-        about: 'Dr. Kumar specializes in diabetes management and general medicine with 10 years of experience.',
-        profileImage: 'https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=150',
-        rating: 4.6,
-        reviewsCount: 189,
-        isConsultOnline: true,
-        isHomeVisit: true
-      },
-      {
-        _id: '3',
-        name: 'Dr. Sarah Ahmed',
-        specializations: ['General Physician', 'Family Medicine'],
-        primarySpecialization: 'General Physician',
-        qualifications: ['MBBS', 'MD (Family Medicine)'],
-        experience: 8,
-        gender: 'female',
-        languages: ['English', 'Hindi', 'Urdu'],
-        clinics: [
-          {
-            name: 'Apollo Spectra',
-            address: '789 River View',
-            city: 'Delhi',
-            state: 'Delhi',
-            pincode: '110003',
-            consultationFee: 900
-          }
-        ],
-        availability: [
-          {
-            day: 'Wednesday',
-            slots: [
-              {
-                startTime: '09:00',
-                endTime: '14:00'
-              }
-            ]
-          }
-        ],
-        about: 'Dr. Ahmed focuses on family medicine and preventive care with a patient-centered approach.',
-        profileImage: 'https://images.pexels.com/photos/5407206/pexels-photo-5407206.jpeg?auto=compress&cs=tinysrgb&w=150',
-        rating: 4.7,
-        reviewsCount: 156,
-        isConsultOnline: false,
-        isHomeVisit: false
-      },
-      {
-        _id: '4',
-        name: 'Dr. Vikram Singh',
-        specializations: ['General Physician', 'Respiratory Medicine'],
-        primarySpecialization: 'General Physician',
-        qualifications: ['MBBS', 'MD (Respiratory Medicine)'],
-        experience: 12,
-        gender: 'male',
-        languages: ['English', 'Hindi', 'Punjabi'],
-        clinics: [
-          {
-            name: 'Apollo Clinic',
-            address: '321 Hill Road',
-            city: 'Gurgaon',
-            state: 'Haryana',
-            pincode: '122001',
-            consultationFee: 1000
-          }
-        ],
-        availability: [
-          {
-            day: 'Thursday',
-            slots: [
-              {
-                startTime: '11:00',
-                endTime: '19:00'
-              }
-            ]
-          }
-        ],
-        about: 'Dr. Singh is an expert in respiratory conditions and general medicine with 12 years of practice.',
-        profileImage: 'https://images.pexels.com/photos/5327585/pexels-photo-5327585.jpeg?auto=compress&cs=tinysrgb&w=150',
-        rating: 4.9,
-        reviewsCount: 210,
-        isConsultOnline: true,
-        isHomeVisit: false
-      }
-    ] as unknown as IDoctor[];
-    
-    setDoctors(mockDoctors);
-    setPagination({
-      ...pagination,
-      total: mockDoctors.length,
-      totalPages: 1,
-    });
-    setLoading(false);
-  }, []);
+
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams((searchParams ?? new URLSearchParams()).toString());
     params.set('page', newPage.toString());
     router.push(`?${params.toString()}`);
   };
@@ -347,8 +188,8 @@ export default function DoctorListing({ specialty = 'General Physician' }: Docto
               </div>
             ) : (
               <div className="space-y-4">
-                {doctors.map((doctor) => (
-                  <DoctorCard key={doctor._id.toString()} doctor={doctor} />
+                {doctors.map((doctor,id) => (
+                  <DoctorCard key={id} doctor={doctor} />
                 ))}
               </div>
             )}

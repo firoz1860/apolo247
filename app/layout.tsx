@@ -52,6 +52,8 @@ export const metadata:  Metadata = {
   },
 };
 
+import { SessionProvider } from "next-auth/react";
+
 export default function RootLayout({
   children,
 }: {
@@ -59,12 +61,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+  
       <body className={inter.className}>
         <Providers>
           <Header />
           {children}
         </Providers>
       </body>
+      
     </html>
+    
   );
 }

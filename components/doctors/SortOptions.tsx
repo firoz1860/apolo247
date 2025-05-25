@@ -15,7 +15,8 @@ const sortOptions = [
 
 export default function SortOptions() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const rawSearchParams = useSearchParams();
+const searchParams = rawSearchParams || new URLSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
@@ -25,7 +26,7 @@ export default function SortOptions() {
   
   // Handle sort option selection
   const handleSortChange = (value: string) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('sort', value);
     
     // Reset to page 1 when sort changes

@@ -1,21 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { 
-  CheckSquare, 
-  Square, 
-  Award, 
-  Star, 
-  User, 
-  Calendar, 
-  Video, 
-  Home, 
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Award,
+  Star,
+  User,
+  Calendar,
+  Video,
+  Home,
   Filter,
   ChevronDown,
-  ChevronUp 
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  ChevronUp,
+} from "lucide-react";
 
 interface FilterSidebarProps {
   onApply?: () => void;
@@ -24,8 +21,7 @@ interface FilterSidebarProps {
 export default function FilterSidebar({ onApply }: FilterSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  // State for UI collapsible sections
+
   const [expandedSections, setExpandedSections] = useState({
     experience: true,
     gender: true,
@@ -33,452 +29,265 @@ export default function FilterSidebar({ onApply }: FilterSidebarProps) {
     availability: true,
     rating: true,
   });
-  
-  // State for filters
+
   const [filters, setFilters] = useState({
-    gender: searchParams.get('gender') || '',
-    minExperience: searchParams.get('minExperience') || '',
-    maxFee: searchParams.get('maxFee') || '',
-    isOnline: searchParams.get('isOnline') === 'true',
-    isHomeVisit: searchParams.get('isHomeVisit') === 'true',
-    minRating: searchParams.get('minRating') || '',
-    sort: searchParams.get('sort') || 'rating',
+    gender: "",
+    minExperience: "",
+    maxFee: "",
+    isOnline: false,
+    isHomeVisit: false,
+    minRating: "",
+    sort: "rating",
   });
-  
-  // Toggle section expansion
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
+
+  useEffect(() => {
+    if (!searchParams) return;
+
+    setFilters({
+      gender: searchParams.get("gender") || "",
+      minExperience: searchParams.get("minExperience") || "",
+      maxFee: searchParams.get("maxFee") || "",
+      isOnline: searchParams.get("isOnline") === "true",
+      isHomeVisit: searchParams.get("isHomeVisit") === "true",
+      minRating: searchParams.get("minRating") || "",
+      sort: searchParams.get("sort") || "rating",
+    });
+  }, [searchParams]);
+
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({
       ...prev,
-      [section]: !prev[section]
+      [section]: !prev[section as keyof typeof prev],
     }));
   };
-  
-  // Apply filters
+
+  const handleChange = (key: string, value: string | boolean) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
   const applyFilters = () => {
-    // Create new URLSearchParams object
     const params = new URLSearchParams();
-    
-    // Add all filter parameters that have values
-    if (filters.gender) params.set('gender', filters.gender);
-    if (filters.minExperience) params.set('minExperience', filters.minExperience);
-    if (filters.maxFee) params.set('maxFee', filters.maxFee);
-    if (filters.minRating) params.set('minRating', filters.minRating);
-    if (filters.isOnline) params.set('isOnline', 'true');
-    if (filters.isHomeVisit) params.set('isHomeVisit', 'true');
-    if (filters.sort) params.set('sort', filters.sort);
-    
-    // Preserve page size if it exists
-    const limit = searchParams.get('limit');
-    if (limit) params.set('limit', limit);
-    
-    // Reset to page 1 when filters change
-    params.set('page', '1');
-    
-    // Navigate to new URL with filters
+
+    if (filters.gender) params.set("gender", filters.gender);
+    if (filters.minExperience)
+      params.set("minExperience", filters.minExperience);
+    if (filters.maxFee) params.set("maxFee", filters.maxFee);
+    if (filters.minRating) params.set("minRating", filters.minRating);
+    if (filters.isOnline) params.set("isOnline", "true");
+    if (filters.isHomeVisit) params.set("isHomeVisit", "true");
+    if (filters.sort) params.set("sort", filters.sort);
+
+    const limit = searchParams?.get("limit");
+    if (limit) params.set("limit", limit);
+
+    params.set("page", "1");
+
     router.push(`?${params.toString()}`);
-    
-    // Call onApply callback if provided (for mobile)
     if (onApply) onApply();
   };
-  
-  // Reset filters
+
   const resetFilters = () => {
     setFilters({
-      gender: '',
-      minExperience: '',
-      maxFee: '',
+      gender: "",
+      minExperience: "",
+      maxFee: "",
       isOnline: false,
       isHomeVisit: false,
-      minRating: '',
-      sort: 'rating',
+      minRating: "",
+      sort: "rating",
     });
-    
-    // Navigate to URL without filters
-    router.push('');
-    
-    // Call onApply callback if provided (for mobile)
+
+    const newParams = new URLSearchParams();
+    newParams.set("page", "1");
+
+    router.push(`?${newParams.toString()}`);
     if (onApply) onApply();
   };
-  
-  // Handle checkbox change
-  const handleCheckboxChange = (name: string, value: boolean) => {
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  // Handle radio change
-  const handleRadioChange = (name: string, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
+
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-apollo-blue flex items-center">
-          <Filter size={18} className="mr-2" />
-          Filters
-        </h2>
-        <button 
-          onClick={resetFilters}
-          className="text-sm text-apollo-lightBlue hover:underline"
-        >
-          Clear All
-        </button>
+    <div className="w-full p-4 bg-white rounded-lg shadow-md">
+      {/* Filter Header */}
+      <div className="flex items-center gap-2 text-xl font-semibold mb-4">
+        <Filter className="w-5 h-5" />
+        Filters
       </div>
-      
-      {/* Experience Filter */}
-      <div className="border-b pb-4 mb-4">
-        <button 
-          className="w-full flex justify-between items-center mb-3"
-          onClick={() => toggleSection('experience')}
+
+      {/* Experience Section */}
+      <div>
+        <div
+          className="flex justify-between items-center cursor-pointer"
+          onClick={() => toggleSection("experience")}
         >
-          <div className="flex items-center">
-            <Award size={16} className="mr-2 text-apollo-blue" />
-            <h3 className="font-medium">Experience</h3>
+          <div className="flex items-center gap-2 font-medium">
+            <Award className="w-4 h-4" />
+            Experience
           </div>
-          {expandedSections.experience ? (
-            <ChevronUp size={16} className="text-gray-500" />
-          ) : (
-            <ChevronDown size={16} className="text-gray-500" />
-          )}
-        </button>
-        
+          {expandedSections.experience ? <ChevronUp /> : <ChevronDown />}
+        </div>
+
         {expandedSections.experience && (
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="exp-any"
-                name="experience"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.minExperience === ''}
-                onChange={() => handleRadioChange('minExperience', '')}
-              />
-              <label htmlFor="exp-any" className="text-sm text-gray-700">
-                Any Experience
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="exp-5"
-                name="experience"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.minExperience === '5'}
-                onChange={() => handleRadioChange('minExperience', '5')}
-              />
-              <label htmlFor="exp-5" className="text-sm text-gray-700">
-                5+ Years
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="exp-10"
-                name="experience"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.minExperience === '10'}
-                onChange={() => handleRadioChange('minExperience', '10')}
-              />
-              <label htmlFor="exp-10" className="text-sm text-gray-700">
-                10+ Years
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="exp-15"
-                name="experience"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.minExperience === '15'}
-                onChange={() => handleRadioChange('minExperience', '15')}
-              />
-              <label htmlFor="exp-15" className="text-sm text-gray-700">
-                15+ Years
-              </label>
-            </div>
+          <div className="mt-2 space-y-2 px-1">
+            <label
+              htmlFor="experience-range"
+              className="text-sm text-gray-700 block"
+            >
+              Minimum Experience: {filters.minExperience || 0} yrs
+            </label>
+            <input
+              id="experience-range"
+              type="range"
+              min="0"
+              max="30"
+              step="1"
+              value={filters.minExperience || 0}
+              onChange={(e) => handleChange("minExperience", e.target.value)}
+              className="w-full accent-apollo-blue"
+            />
           </div>
         )}
       </div>
-      
-      {/* Gender Filter */}
-      <div className="border-b pb-4 mb-4">
-        <button 
-          className="w-full flex justify-between items-center mb-3"
-          onClick={() => toggleSection('gender')}
+
+      {/* Gender Section */}
+      <div className="mt-4">
+        <div
+          className="flex justify-between items-center cursor-pointer"
+          onClick={() => toggleSection("gender")}
         >
-          <div className="flex items-center">
-            <User size={16} className="mr-2 text-apollo-blue" />
-            <h3 className="font-medium">Gender</h3>
+          <div className="flex items-center gap-2 font-medium">
+            <User className="w-4 h-4" />
+            Gender
           </div>
-          {expandedSections.gender ? (
-            <ChevronUp size={16} className="text-gray-500" />
-          ) : (
-            <ChevronDown size={16} className="text-gray-500" />
-          )}
-        </button>
-        
+          {expandedSections.gender ? <ChevronUp /> : <ChevronDown />}
+        </div>
         {expandedSections.gender && (
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="gender-any"
-                name="gender"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.gender === ''}
-                onChange={() => handleRadioChange('gender', '')}
-              />
-              <label htmlFor="gender-any" className="text-sm text-gray-700">
-                Any Gender
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="gender-male"
-                name="gender"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.gender === 'male'}
-                onChange={() => handleRadioChange('gender', 'male')}
-              />
-              <label htmlFor="gender-male" className="text-sm text-gray-700">
-                Male Doctor
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="gender-female"
-                name="gender"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.gender === 'female'}
-                onChange={() => handleRadioChange('gender', 'female')}
-              />
-              <label htmlFor="gender-female" className="text-sm text-gray-700">
-                Female Doctor
-              </label>
-            </div>
+          <div className="mt-2">
+            <select
+              className="w-full mt-1 p-2 border rounded"
+              value={filters.gender}
+              onChange={(e) => handleChange("gender", e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
           </div>
         )}
       </div>
-      
-      {/* Fee Filter */}
-      <div className="border-b pb-4 mb-4">
-        <button 
-          className="w-full flex justify-between items-center mb-3"
-          onClick={() => toggleSection('fee')}
+
+      {/* Fee Section */}
+      <div className="mt-4">
+        <div
+          className="flex justify-between items-center cursor-pointer"
+          onClick={() => toggleSection("fee")}
         >
-          <div className="flex items-center">
-            <span className="mr-2 text-apollo-blue font-medium">₹</span>
-            <h3 className="font-medium">Consultation Fee</h3>
+          <div className="flex items-center gap-2 font-medium">
+            <Calendar className="w-4 h-4" />
+            Max Fee
           </div>
-          {expandedSections.fee ? (
-            <ChevronUp size={16} className="text-gray-500" />
-          ) : (
-            <ChevronDown size={16} className="text-gray-500" />
-          )}
-        </button>
-        
+          {expandedSections.fee ? <ChevronUp /> : <ChevronDown />}
+        </div>
+
         {expandedSections.fee && (
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="fee-any"
-                name="fee"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.maxFee === ''}
-                onChange={() => handleRadioChange('maxFee', '')}
-              />
-              <label htmlFor="fee-any" className="text-sm text-gray-700">
-                Any Fee
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="fee-500"
-                name="fee"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.maxFee === '500'}
-                onChange={() => handleRadioChange('maxFee', '500')}
-              />
-              <label htmlFor="fee-500" className="text-sm text-gray-700">
-                Up to ₹500
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="fee-1000"
-                name="fee"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.maxFee === '1000'}
-                onChange={() => handleRadioChange('maxFee', '1000')}
-              />
-              <label htmlFor="fee-1000" className="text-sm text-gray-700">
-                Up to ₹1000
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="fee-1500"
-                name="fee"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.maxFee === '1500'}
-                onChange={() => handleRadioChange('maxFee', '1500')}
-              />
-              <label htmlFor="fee-1500" className="text-sm text-gray-700">
-                Up to ₹1500
-              </label>
-            </div>
+          <div className="mt-2 space-y-2 px-1">
+            <label htmlFor="fee-range" className="text-sm text-gray-700 block">
+              Max Fee: ₹{filters.maxFee || 0}
+            </label>
+            <input
+              id="fee-range"
+              type="range"
+              min="0"
+              max="5000"
+              step="100"
+              value={filters.maxFee || 0}
+              onChange={(e) => handleChange("maxFee", e.target.value)}
+              className="w-full accent-apollo-blue"
+            />
           </div>
         )}
       </div>
-      
-      {/* Availability Type Filter */}
-      <div className="border-b pb-4 mb-4">
-        <button 
-          className="w-full flex justify-between items-center mb-3"
-          onClick={() => toggleSection('availability')}
+
+      {/* Availability Section */}
+      <div className="mt-4">
+        <div
+          className="flex justify-between items-center cursor-pointer"
+          onClick={() => toggleSection("availability")}
         >
-          <div className="flex items-center">
-            <Calendar size={16} className="mr-2 text-apollo-blue" />
-            <h3 className="font-medium">Availability</h3>
+          <div className="flex items-center gap-2 font-medium">
+            <Video className="w-4 h-4" />
+            Availability
           </div>
-          {expandedSections.availability ? (
-            <ChevronUp size={16} className="text-gray-500" />
-          ) : (
-            <ChevronDown size={16} className="text-gray-500" />
-          )}
-        </button>
-        
+          {expandedSections.availability ? <ChevronUp /> : <ChevronDown />}
+        </div>
         {expandedSections.availability && (
-          <div className="space-y-2">
-            <div className="flex items-center">
+          <div className="mt-2 space-y-2">
+            <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                id="available-online"
-                className="mr-2 rounded text-apollo-blue focus:ring-apollo-blue h-4 w-4"
                 checked={filters.isOnline}
-                onChange={(e) => handleCheckboxChange('isOnline', e.target.checked)}
+                onChange={(e) => handleChange("isOnline", e.target.checked)}
               />
-              <label htmlFor="available-online" className="text-sm text-gray-700 flex items-center">
-                <Video size={14} className="mr-1 text-apollo-lightBlue" />
-                Online Consultation
-              </label>
-            </div>
-            <div className="flex items-center">
+              Online
+            </label>
+            <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                id="available-home"
-                className="mr-2 rounded text-apollo-blue focus:ring-apollo-blue h-4 w-4"
                 checked={filters.isHomeVisit}
-                onChange={(e) => handleCheckboxChange('isHomeVisit', e.target.checked)}
+                onChange={(e) => handleChange("isHomeVisit", e.target.checked)}
               />
-              <label htmlFor="available-home" className="text-sm text-gray-700 flex items-center">
-                <Home size={14} className="mr-1 text-purple-600" />
-                Home Visit
-              </label>
-            </div>
+              Home Visit
+            </label>
           </div>
         )}
       </div>
-      
-      {/* Rating Filter */}
-      <div className="pb-4 mb-4">
-        <button 
-          className="w-full flex justify-between items-center mb-3"
-          onClick={() => toggleSection('rating')}
+
+      {/* Rating Section */}
+      <div className="mt-4">
+        <div
+          className="flex justify-between items-center cursor-pointer"
+          onClick={() => toggleSection("rating")}
         >
-          <div className="flex items-center">
-            <Star size={16} className="mr-2 text-apollo-blue" />
-            <h3 className="font-medium">Rating</h3>
+          <div className="flex items-center gap-2 font-medium">
+            <Star className="w-4 h-4" />
+            Min Rating
           </div>
-          {expandedSections.rating ? (
-            <ChevronUp size={16} className="text-gray-500" />
-          ) : (
-            <ChevronDown size={16} className="text-gray-500" />
-          )}
-        </button>
-        
+          {expandedSections.rating ? <ChevronUp /> : <ChevronDown />}
+        </div>
         {expandedSections.rating && (
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="rating-any"
-                name="rating"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.minRating === ''}
-                onChange={() => handleRadioChange('minRating', '')}
-              />
-              <label htmlFor="rating-any" className="text-sm text-gray-700">
-                Any Rating
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="rating-3"
-                name="rating"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.minRating === '3'}
-                onChange={() => handleRadioChange('minRating', '3')}
-              />
-              <label htmlFor="rating-3" className="text-sm text-gray-700 flex items-center">
-                <span className="mr-1">3+</span>
-                <Star size={12} className="fill-yellow-400 text-yellow-400" />
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="rating-4"
-                name="rating"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.minRating === '4'}
-                onChange={() => handleRadioChange('minRating', '4')}
-              />
-              <label htmlFor="rating-4" className="text-sm text-gray-700 flex items-center">
-                <span className="mr-1">4+</span>
-                <Star size={12} className="fill-yellow-400 text-yellow-400" />
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="radio"
-                id="rating-4.5"
-                name="rating"
-                className="mr-2 text-apollo-blue focus:ring-apollo-blue h-4 w-4"
-                checked={filters.minRating === '4.5'}
-                onChange={() => handleRadioChange('minRating', '4.5')}
-              />
-              <label htmlFor="rating-4.5" className="text-sm text-gray-700 flex items-center">
-                <span className="mr-1">4.5+</span>
-                <Star size={12} className="fill-yellow-400 text-yellow-400" />
-              </label>
-            </div>
+          <div className="mt-2">
+            <select
+              className="w-full mt-1 p-2 border rounded"
+              value={filters.minRating}
+              onChange={(e) => handleChange("minRating", e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="1">1+</option>
+              <option value="2">2+</option>
+              <option value="3">3+</option>
+              <option value="4">4+</option>
+              <option value="5">5</option>
+            </select>
           </div>
         )}
       </div>
-      
-      {/* Apply Button - Visible on Mobile Only */}
-      {onApply && (
+
+      {/* Buttons */}
+      <div className="flex gap-2 mt-6">
         <button
-          onClick={applyFilters}
-          className="w-full bg-apollo-blue text-white py-2 px-4 rounded font-medium hover:bg-opacity-90 transition-colors"
+          className="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded"
+          onClick={resetFilters}
         >
-          Apply Filters
+          Reset
         </button>
-      )}
+        <button
+          className="w-1/2 w-full py-2 px-4 bg-apollo-blue text-white rounded"
+          onClick={applyFilters}
+        >
+          Apply
+        </button>
+      </div>
     </div>
   );
 }
