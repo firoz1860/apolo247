@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:doctors": "node scripts/seedDoctors.js"
+    "seed:doctors": "node scripts/seedDoctors.js",
+    "seed:pharmacy": "node scripts/seedProducts.js",
+    "seed:lab-tests": "node scripts/seedLabTests.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
