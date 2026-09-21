@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { Star, Calendar, Video, Clock, MapPin, Award, Home } from 'lucide-react';
 import { IDoctor } from '@/lib/db/models/Doctor';
 
@@ -9,6 +10,7 @@ interface DoctorCardProps {
 }
 
 export default function DoctorCard({ doctor }: DoctorCardProps) {
+  const doctorId = String((doctor as { _id?: unknown })._id ?? '');
   const lowestFee = doctor.clinics.reduce(
     (min, clinic) => Math.min(min, clinic.consultationFee),
     doctor.clinics[0]?.consultationFee || 0
@@ -109,13 +111,19 @@ export default function DoctorCard({ doctor }: DoctorCardProps) {
           </div>
 
           <div className="flex flex-col space-y-2">
-            <button className="bg-apollo-blue text-white py-2 px-4 rounded text-sm font-medium hover:bg-opacity-90 transition-colors">
+            <Link
+              href={`/doctors/${doctorId}`}
+              className="bg-apollo-blue text-white py-2 px-4 rounded text-sm font-medium hover:bg-opacity-90 transition-colors text-center"
+            >
               Book Appointment
-            </button>
+            </Link>
             {doctor.isConsultOnline && (
-              <button className="border border-apollo-blue text-apollo-blue py-2 px-4 rounded text-sm font-medium hover:bg-blue-50 transition-colors">
+              <Link
+                href={`/doctors/${doctorId}`}
+                className="border border-apollo-blue text-apollo-blue py-2 px-4 rounded text-sm font-medium hover:bg-blue-50 transition-colors text-center"
+              >
                 Consult Online
-              </button>
+              </Link>
             )}
           </div>
         </div>

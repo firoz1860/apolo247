@@ -97,19 +97,19 @@ const Header = () => {
         <div className="apollo-container flex justify-between items-center">
           <div className="hidden md:flex items-center space-x-4">
             <Link
-              href="#"
+              href="/find-doctors"
               className="hover:text-apollo-orange transition-colors"
             >
               Consult
             </Link>
             <Link
-              href="#"
+              href="/pharmacy"
               className="hover:text-apollo-orange transition-colors"
             >
               Order Medicines
             </Link>
             <Link
-              href="#"
+              href="/lab-tests"
               className="hover:text-apollo-orange transition-colors"
             >
               Lab Tests
@@ -159,25 +159,31 @@ const Header = () => {
             <nav className="hidden lg:flex items-center space-x-8">
               <Dropdown title="Find Doctors" items={specialties} />
               <Link
-                href="/"
+                href="/appointments"
+                className="text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
+              >
+                Appointments
+              </Link>
+              <Link
+                href="/find-doctors"
                 className="text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
               >
                 Consult
               </Link>
               <Link
-                href="/"
+                href="/pharmacy"
                 className="text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
               >
                 Pharmacy
               </Link>
               <Link
-                href="/"
+                href="/lab-tests"
                 className="text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
               >
                 Lab Tests
               </Link>
               <Link
-                href="/"
+                href="/health-records"
                 className="text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
               >
                 Health Records
@@ -247,28 +253,35 @@ const Header = () => {
                 Find Doctors
               </Link>
               <Link
-                href="/"
+                href="/appointments"
+                className="block text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Appointments
+              </Link>
+              <Link
+                href="/find-doctors"
                 className="block text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Consult
               </Link>
               <Link
-                href="/"
+                href="/pharmacy"
                 className="block text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Pharmacy
               </Link>
               <Link
-                href="/"
+                href="/lab-tests"
                 className="block text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Lab Tests
               </Link>
               <Link
-                href="/"
+                href="/health-records"
                 className="block text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >

@@ -10,6 +10,15 @@ managing a user account. Built with **Next.js 13 (App Router)**, **TypeScript**,
   lookup, and change-password, backed by JWT.
 - **Doctors service** — list/filter/sort/paginate doctors, fetch a single
   doctor, and (authenticated) create/update/delete doctors.
+- **Appointment booking** — doctor detail page with clinic/date/slot
+  selection, server-computed availability (no double-booking), and a
+  "My Appointments" page to cancel or reschedule.
+- **Pharmacy** — product catalog with search/categories, a cart, and a
+  mock checkout that persists an order.
+- **Lab tests** — diagnostic-test catalog with date-based booking.
+- **Health records** — authenticated view of profile + medical history.
+- **Guest login** — try authenticated features instantly with a
+  throwaway guest account (real JWT), no signup required.
 - **Specialty pages** — cardiology, dentistry, neurology, orthopedics,
   pediatrics, ophthalmology, general physician / internal medicine.
 - Responsive UI with loading, empty, and error states.
@@ -75,6 +84,7 @@ See [`.env.example`](./.env.example). The important ones:
 | ----------------- | --------------------------- | --------- | --------------------------- |
 | POST              | `/api/auth/signup`          | –         | Register a new user         |
 | POST              | `/api/auth/login`           | –         | Log in, returns a JWT       |
+| POST              | `/api/auth/guest`           | –         | Start a guest session (JWT) |
 | POST              | `/api/auth/logout`          | –         | Clear auth cookies          |
 | GET / PUT         | `/api/auth/me`              | Bearer    | Read / update own profile   |
 | POST              | `/api/auth/change-password` | Bearer    | Change password             |
@@ -82,6 +92,17 @@ See [`.env.example`](./.env.example). The important ones:
 | POST              | `/api/doctors`              | Bearer    | Create a doctor             |
 | GET               | `/api/doctors/:id`          | –         | Get one doctor              |
 | PUT / DELETE      | `/api/doctors/:id`          | Bearer    | Update / delete a doctor    |
+| GET               | `/api/doctors/:id/slots`    | –         | Bookable slots for a date   |
+| GET               | `/api/appointments`         | Bearer    | List own appointments       |
+| POST              | `/api/appointments`         | Bearer    | Book an appointment         |
+| GET               | `/api/appointments/:id`     | Bearer    | Get own appointment         |
+| PATCH             | `/api/appointments/:id`     | Bearer    | Cancel / reschedule         |
+| GET               | `/api/products`             | –         | List pharmacy products      |
+| POST              | `/api/orders`               | Bearer    | Place an order (mock pay)   |
+| GET               | `/api/orders`               | Bearer    | List own orders             |
+| GET               | `/api/lab-tests`            | –         | List lab tests              |
+| POST              | `/api/lab-bookings`         | Bearer    | Book a lab test             |
+| GET               | `/api/lab-bookings`         | Bearer    | List own lab bookings       |
 
 Authenticated requests send `Authorization: Bearer <token>`.
 

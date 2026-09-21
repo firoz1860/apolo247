@@ -24,8 +24,27 @@
 
 ## Phase 2 — Product completeness
 
-- ⬜ Appointment booking flow (model + API + UI)
-- ⬜ Doctor detail page consuming `/api/doctors/:id`
+Delivered as one PR per subsystem, stacked in dependency order.
+
+- ✅ **Appointment booking** (model + Zod-validated API + UI + tests)
+  - `Appointment` model with a partial-unique index preventing double-booking
+  - `GET /api/doctors/:id/slots`, `POST/GET /api/appointments`,
+    `GET/PATCH /api/appointments/:id` (owner-scoped, cancel/reschedule)
+  - Doctor detail page (`/doctors/:id`) with a booking panel + "My
+    Appointments" page (`/appointments`)
+- ✅ Doctor detail page consuming `/api/doctors/:id`
+- ✅ **Guest login** — `POST /api/auth/guest` issues a real JWT for a
+  throwaway guest account; "Continue as guest" on the login page
+- ✅ **Pharmacy** — `Product`/`Order` models, catalog API, `/pharmacy`
+  catalog with search + localStorage cart, `/pharmacy/cart` mock checkout
+- ✅ **Lab tests** — `LabTest`/`LabBooking` models, catalog API,
+  `/lab-tests` with date-based booking
+- ✅ **Health Records** — auth-gated `/health-records` (profile + history)
+- ✅ **Navigation wired** — top bar + main nav point to real routes
+  (Consult → /find-doctors, Pharmacy, Lab Tests, Health Records)
+- 🚧 User dashboard / profile (edit profile + medical history)
+- 🚧 Doctor reviews & ratings (feed the existing rating sort)
+- 🚧 Order/lab-booking management pages (list + cancel)
 - ⬜ Wire `FilterSidebar` / `SortOptions` to real query params end-to-end
 - ⬜ Email-based password reset (separate from change-password)
 - ⬜ Persist auth as httpOnly cookie only (drop localStorage) and read it

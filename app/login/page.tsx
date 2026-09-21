@@ -11,6 +11,26 @@ export default function LoginPage() {
   });
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [guestLoading, setGuestLoading] = useState(false);
+
+  const handleGuest = async () => {
+    setGuestLoading(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/auth/guest", { method: "POST" });
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem("authtoken", data.token);
+        window.location.href = "/";
+        return;
+      }
+      setMsg("Could not start a guest session. Please try again.");
+    } catch {
+      setMsg("Something went wrong. Please try again.");
+    } finally {
+      setGuestLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,6 +183,30 @@ export default function LoginPage() {
               </button>
             </div>
           </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-2 text-gray-500">or</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGuest}
+              disabled={guestLoading}
+              className="mt-4 w-full flex justify-center items-center py-2 px-4 border border-apollo-blue rounded-md text-sm font-medium text-apollo-blue bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-apollo-blue disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {guestLoading ? (
+                <div className="w-5 h-5 border-2 border-apollo-blue border-t-transparent rounded-full animate-spin" />
+              ) : (
+                "Continue as guest"
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </main>
