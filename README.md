@@ -103,6 +103,9 @@ See [`.env.example`](./.env.example). The important ones:
 | GET               | `/api/lab-tests`            | –         | List lab tests              |
 | POST              | `/api/lab-bookings`         | Bearer    | Book a lab test             |
 | GET               | `/api/lab-bookings`         | Bearer    | List own lab bookings       |
+| GET               | `/api/doctors/:id/reviews`  | –         | List a doctor's reviews     |
+| POST              | `/api/doctors/:id/reviews`  | Bearer    | Add/update your review      |
+| PUT               | `/api/auth/me`              | Bearer    | Update your profile         |
 
 Authenticated requests send `Authorization: Bearer <token>`.
 

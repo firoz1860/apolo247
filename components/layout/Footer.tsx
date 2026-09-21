@@ -15,6 +15,8 @@ const columns: { title: string; links: FooterLink[] }[] = [
       { label: 'Lab Tests', href: '/lab-tests' },
       { label: 'Health Records', href: '/health-records' },
       { label: 'My Appointments', href: '/appointments' },
+      { label: 'My Orders', href: '/orders' },
+      { label: 'My Profile', href: '/profile' },
     ],
   },
   {

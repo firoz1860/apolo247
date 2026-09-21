@@ -42,9 +42,14 @@ Delivered as one PR per subsystem, stacked in dependency order.
 - ✅ **Health Records** — auth-gated `/health-records` (profile + history)
 - ✅ **Navigation wired** — top bar + main nav point to real routes
   (Consult → /find-doctors, Pharmacy, Lab Tests, Health Records)
-- 🚧 User dashboard / profile (edit profile + medical history)
-- 🚧 Doctor reviews & ratings (feed the existing rating sort)
-- 🚧 Order/lab-booking management pages (list + cancel)
+- ✅ **User profile** — `/profile` edits name, phone, gender and medical
+  history via `PUT /api/auth/me`
+- ✅ **Doctor reviews & ratings** — `Review` model, `/api/doctors/:id/reviews`
+  (one review per user, recomputes the doctor's aggregate rating), review
+  UI on the doctor detail page
+- ✅ **Order & booking history** — `/orders` lists pharmacy orders and lab
+  bookings
+- ⬜ Order/lab-booking cancellation from the history page
 - ⬜ Wire `FilterSidebar` / `SortOptions` to real query params end-to-end
 - ⬜ Email-based password reset (separate from change-password)
 - ⬜ Persist auth as httpOnly cookie only (drop localStorage) and read it

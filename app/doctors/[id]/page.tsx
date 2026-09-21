@@ -48,6 +48,14 @@ interface Slot {
   endTime: string;
 }
 
+interface Review {
+  _id: string;
+  userName: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+}
+
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
 export default function DoctorDetailPage() {
@@ -58,6 +66,13 @@ export default function DoctorDetailPage() {
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Reviews state
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [myRating, setMyRating] = useState(0);
+  const [myComment, setMyComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewMsg, setReviewMsg] = useState<string | null>(null);
 
   // Booking state
   const [consultationType, setConsultationType] = useState<ConsultationType>('online');
@@ -89,6 +104,56 @@ export default function DoctorDetailPage() {
       }
     })();
   }, [doctorId]);
+
+  const loadReviews = useCallback(async () => {
+    if (!doctorId) return;
+    try {
+      const res = await fetch(`/api/doctors/${doctorId}/reviews`);
+      const result = await res.json();
+      if (res.ok && result.success) setReviews(result.data);
+    } catch {
+      /* non-critical */
+    }
+  }, [doctorId]);
+
+  useEffect(() => {
+    loadReviews();
+  }, [loadReviews]);
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReviewMsg(null);
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authtoken') : null;
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    if (myRating < 1) {
+      setReviewMsg('Please choose a star rating.');
+      return;
+    }
+    setReviewSubmitting(true);
+    try {
+      const res = await fetch(`/api/doctors/${doctorId}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ rating: myRating, comment: myComment || undefined }),
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        setReviewMsg(result.error || 'Could not submit review.');
+      } else {
+        setReviewMsg('Thanks for your review!');
+        setMyComment('');
+        setMyRating(0);
+        loadReviews();
+      }
+    } catch {
+      setReviewMsg('Something went wrong. Please try again.');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   const loadSlots = useCallback(async () => {
     if (!doctorId || !date) return;
@@ -234,6 +299,67 @@ export default function DoctorDetailPage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Reviews */}
+          <div className="mt-6 border-t pt-6">
+            <h2 className="font-semibold text-gray-800 mb-3">
+              Patient reviews ({reviews.length})
+            </h2>
+
+            <form onSubmit={handleSubmitReview} className="bg-gray-50 rounded-md p-4 mb-4">
+              <div className="flex items-center gap-1 mb-2">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setMyRating(n)}
+                    aria-label={`${n} star${n > 1 ? 's' : ''}`}
+                  >
+                    <Star
+                      className={`h-6 w-6 ${
+                        n <= myRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={myComment}
+                onChange={(e) => setMyComment(e.target.value)}
+                placeholder="Share your experience (optional)"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                rows={2}
+              />
+              {reviewMsg && <p className="text-sm mt-1 text-apollo-blue">{reviewMsg}</p>}
+              <button
+                type="submit"
+                disabled={reviewSubmitting}
+                className="mt-2 bg-apollo-blue text-white text-sm px-4 py-1.5 rounded-md hover:bg-opacity-90 disabled:opacity-50"
+              >
+                {reviewSubmitting ? 'Submitting…' : 'Submit review'}
+              </button>
+            </form>
+
+            {reviews.length === 0 ? (
+              <p className="text-sm text-gray-500">No reviews yet. Be the first to review.</p>
+            ) : (
+              <div className="space-y-3">
+                {reviews.map((r) => (
+                  <div key={r._id} className="border-b pb-3 last:border-b-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-800 text-sm">{r.userName}</span>
+                      <span className="flex items-center">
+                        {Array.from({ length: r.rating }).map((_, i) => (
+                          <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </span>
+                    </div>
+                    {r.comment && <p className="text-sm text-gray-600 mt-1">{r.comment}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
