@@ -159,6 +159,12 @@ const Header = () => {
             <nav className="hidden lg:flex items-center space-x-8">
               <Dropdown title="Find Doctors" items={specialties} />
               <Link
+                href="/appointments"
+                className="text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
+              >
+                Appointments
+              </Link>
+              <Link
                 href="/"
                 className="text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
               >
@@ -245,6 +251,13 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Find Doctors
+              </Link>
+              <Link
+                href="/appointments"
+                className="block text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Appointments
               </Link>
               <Link
                 href="/"
