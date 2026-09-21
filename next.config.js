@@ -4,9 +4,13 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  images: { unoptimized: true },
   images: {
-    domains: ['images.pexels.com','randomuser.me','dr-sana.png','dr-rahul.png'], 
+    unoptimized: true,
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.pexels.com' },
+      { protocol: 'https', hostname: 'randomuser.me' },
+      { protocol: 'https', hostname: 'newassets.apollo247.com' },
+    ],
   },
 };
 

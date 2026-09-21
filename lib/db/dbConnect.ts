@@ -1,100 +1,62 @@
 import mongoose from 'mongoose';
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/apollo247clone';
 
-
-// Track connection status
-let isConnected = false;
+const MONGODB_URI =
+  process.env.MONGODB_URI || 'mongodb://localhost:27017/apollo247clone';
 
 /**
- * Connect to MongoDB database
+ * Cache the Mongoose connection across hot-reloads in development and across
+ * invocations in a serverless environment. Without this, every request (or
+ * every HMR reload) would open a brand new connection and eventually exhaust
+ * the connection pool.
  */
-export const dbConnect = async () => {
-  console.log('MongoDB URI:', MONGODB_URI);
-  if (isConnected) {
-    return;
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
+declare global {
+  // eslint-disable-next-line no-var
+  var _mongooseCache: MongooseCache | undefined;
+}
+
+const cached: MongooseCache =
+  global._mongooseCache || (global._mongooseCache = { conn: null, promise: null });
+
+/**
+ * Connect to MongoDB using a cached singleton connection.
+ */
+export const dbConnect = async (): Promise<typeof mongoose> => {
+  if (cached.conn) {
+    return cached.conn;
   }
-  
-  try {
-    const db = await mongoose.connect(MONGODB_URI);
-    isConnected = db.connections[0].readyState === 1;
-    console.log('MongoDB connected successfully');
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    throw new Error('MongoDB connection failed');
+
+  if (!cached.promise) {
+    cached.promise = mongoose
+      .connect(MONGODB_URI, { bufferCommands: false })
+      .then((m) => {
+        console.log('✅ MongoDB connected successfully');
+        return m;
+      })
+      .catch((error) => {
+        // Reset the promise so a later request can retry the connection.
+        cached.promise = null;
+        console.error('❌ MongoDB connection error:', error);
+        throw new Error('MongoDB connection failed');
+      });
   }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
 };
 
 /**
- * Disconnect from MongoDB database
-*/
-export const dbDisconnect = async () => {
-  if (!isConnected) {
-    return;
-  }
-  
-  try {
+ * Disconnect from MongoDB (used in tests and script teardown).
+ */
+export const dbDisconnect = async (): Promise<void> => {
+  if (cached.conn) {
     await mongoose.disconnect();
-    isConnected = false;
-    console.log('MongoDB disconnected successfully');
-  } catch (error) {
+    cached.conn = null;
+    cached.promise = null;
     console.log('🛑 MongoDB disconnected');
-    throw new Error('Error disconnecting from database');
   }
 };
-
-// import mongoose from 'mongoose';
-
-// const MONGODB_URI = process.env.MONGODB_URI;
-
-// if (!MONGODB_URI) {
-//   throw new Error(
-//     '❌ Please define the MONGODB_URI environment variable inside .env.local'
-//   );
-// }
-
-// // Global connection cache (for hot-reloading in development)
-// let cached = (global as any).mongoose;
-
-// if (!cached) {
-//   cached = (global as any).mongoose = { conn: null, promise: null };
-// }
-
-// /**
-//  * Connect to MongoDB (singleton pattern)
-//  */
-// export const dbConnect = async () => {
-//   if (cached.conn) return cached.conn;
-
-//   if (!cached.promise) {
-//     const opts = {
-//       bufferCommands: false,
-//       useNewUrlParser: true,
-//       useUnifiedTopology: true,
-//     };
-
-//     cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
-//       console.log('✅ MongoDB connected');
-//       return mongoose;
-//     }).catch((err) => {
-//       console.error('❌ MongoDB connection error:', err);
-//       throw new Error('MongoDB connection failed');
-//     });
-//   }
-
-//   cached.conn = await cached.promise;
-//   return cached.conn;
-// };
-
-// /**
-//  * Optional: Disconnect from MongoDB
-//  * (used in testing or script teardown)
-//  */
-// export const dbDisconnect = async () => {
-//   if (cached.conn) {
-//     await mongoose.disconnect();
-//     cached.conn = null;
-//     console.log('🛑 MongoDB disconnected');
-//   }
-// };
-
-//*/

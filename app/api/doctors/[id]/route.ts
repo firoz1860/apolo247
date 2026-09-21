@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db/dbConnect';
 import Doctor from '@/lib/db/models/Doctor';
+import { requireAuth } from '@/lib/auth/requireAuth';
 
 // GET handler to fetch a single doctor by ID
 export async function GET(
@@ -44,12 +45,16 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Mutations require authentication.
+    const auth = requireAuth(request);
+    if (auth.error) return auth.error;
+
     // Connect to database
     await dbConnect();
-    
+
     // Get doctor ID from params
     const doctorId = params.id;
-    
+
     // Parse request body
     const data = await request.json();
     
@@ -96,12 +101,16 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Mutations require authentication.
+    const auth = requireAuth(request);
+    if (auth.error) return auth.error;
+
     // Connect to database
     await dbConnect();
-    
+
     // Get doctor ID from params
     const doctorId = params.id;
-    
+
     // Delete doctor
     const deletedDoctor = await Doctor.findByIdAndDelete(doctorId);
     
