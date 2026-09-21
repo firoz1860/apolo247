@@ -33,10 +33,18 @@ Delivered as one PR per subsystem, stacked in dependency order.
   - Doctor detail page (`/doctors/:id`) with a booking panel + "My
     Appointments" page (`/appointments`)
 - ✅ Doctor detail page consuming `/api/doctors/:id`
+- ✅ **Guest login** — `POST /api/auth/guest` issues a real JWT for a
+  throwaway guest account; "Continue as guest" on the login page
+- ✅ **Pharmacy** — `Product`/`Order` models, catalog API, `/pharmacy`
+  catalog with search + localStorage cart, `/pharmacy/cart` mock checkout
+- ✅ **Lab tests** — `LabTest`/`LabBooking` models, catalog API,
+  `/lab-tests` with date-based booking
+- ✅ **Health Records** — auth-gated `/health-records` (profile + history)
+- ✅ **Navigation wired** — top bar + main nav point to real routes
+  (Consult → /find-doctors, Pharmacy, Lab Tests, Health Records)
 - 🚧 User dashboard / profile (edit profile + medical history)
 - 🚧 Doctor reviews & ratings (feed the existing rating sort)
-- 🚧 Pharmacy (catalog → cart → mock checkout)
-- 🚧 Lab tests booking
+- 🚧 Order/lab-booking management pages (list + cancel)
 - ⬜ Wire `FilterSidebar` / `SortOptions` to real query params end-to-end
 - ⬜ Email-based password reset (separate from change-password)
 - ⬜ Persist auth as httpOnly cookie only (drop localStorage) and read it
