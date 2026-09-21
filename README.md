@@ -10,6 +10,9 @@ managing a user account. Built with **Next.js 13 (App Router)**, **TypeScript**,
   lookup, and change-password, backed by JWT.
 - **Doctors service** — list/filter/sort/paginate doctors, fetch a single
   doctor, and (authenticated) create/update/delete doctors.
+- **Appointment booking** — doctor detail page with clinic/date/slot
+  selection, server-computed availability (no double-booking), and a
+  "My Appointments" page to cancel or reschedule.
 - **Specialty pages** — cardiology, dentistry, neurology, orthopedics,
   pediatrics, ophthalmology, general physician / internal medicine.
 - Responsive UI with loading, empty, and error states.
@@ -82,6 +85,11 @@ See [`.env.example`](./.env.example). The important ones:
 | POST              | `/api/doctors`              | Bearer    | Create a doctor             |
 | GET               | `/api/doctors/:id`          | –         | Get one doctor              |
 | PUT / DELETE      | `/api/doctors/:id`          | Bearer    | Update / delete a doctor    |
+| GET               | `/api/doctors/:id/slots`    | –         | Bookable slots for a date   |
+| GET               | `/api/appointments`         | Bearer    | List own appointments       |
+| POST              | `/api/appointments`         | Bearer    | Book an appointment         |
+| GET               | `/api/appointments/:id`     | Bearer    | Get own appointment         |
+| PATCH             | `/api/appointments/:id`     | Bearer    | Cancel / reschedule         |
 
 Authenticated requests send `Authorization: Bearer <token>`.
 

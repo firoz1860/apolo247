@@ -24,8 +24,19 @@
 
 ## Phase 2 — Product completeness
 
-- ⬜ Appointment booking flow (model + API + UI)
-- ⬜ Doctor detail page consuming `/api/doctors/:id`
+Delivered as one PR per subsystem, stacked in dependency order.
+
+- ✅ **Appointment booking** (model + Zod-validated API + UI + tests)
+  - `Appointment` model with a partial-unique index preventing double-booking
+  - `GET /api/doctors/:id/slots`, `POST/GET /api/appointments`,
+    `GET/PATCH /api/appointments/:id` (owner-scoped, cancel/reschedule)
+  - Doctor detail page (`/doctors/:id`) with a booking panel + "My
+    Appointments" page (`/appointments`)
+- ✅ Doctor detail page consuming `/api/doctors/:id`
+- 🚧 User dashboard / profile (edit profile + medical history)
+- 🚧 Doctor reviews & ratings (feed the existing rating sort)
+- 🚧 Pharmacy (catalog → cart → mock checkout)
+- 🚧 Lab tests booking
 - ⬜ Wire `FilterSidebar` / `SortOptions` to real query params end-to-end
 - ⬜ Email-based password reset (separate from change-password)
 - ⬜ Persist auth as httpOnly cookie only (drop localStorage) and read it
