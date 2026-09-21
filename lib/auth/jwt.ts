@@ -1,62 +1,40 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-const JWT_EXPIRES_IN = '7d'; 
+const JWT_EXPIRES_IN = '7d';
 
-export const generateToken = (userId: string): string => {
-  return jwt.sign({ userId }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN
-  });
+/**
+ * Resolve the JWT secret. In production a strong secret is mandatory; falling
+ * back to a hard-coded default there would let anyone forge valid tokens.
+ */
+const getJwtSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET environment variable must be set in production');
+    }
+    return 'dev-only-insecure-secret';
+  }
+
+  return secret;
 };
 
-export const verifyToken = (token: string): { userId: string } => {
+export interface JwtPayload {
+  userId: string;
+}
+
+export const generateToken = (userId: string): string => {
+  return jwt.sign({ userId }, getJwtSecret(), { expiresIn: JWT_EXPIRES_IN });
+};
+
+export const verifyToken = (token: string): JwtPayload => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    if(!decoded){
+    const decoded = jwt.verify(token, getJwtSecret()) as JwtPayload;
+    if (!decoded?.userId) {
       throw new Error('Token verification failed');
     }
     return decoded;
   } catch (error) {
     throw new Error('Invalid token');
   }
-  
 };
-
-// const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "access-secret";
-// const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "refresh-secret";
-// import jwt from "jsonwebtoken";
-
-// const ACCESS_TOKEN_EXPIRES_IN = "15m"; // Short-lived
-// const REFRESH_TOKEN_EXPIRES_IN = "7d"; // Long-lived
-
-// // Generate Access Token
-// export const generateAccessToken = (userId: string): string => {
-//   return jwt.sign({ userId }, ACCESS_TOKEN_SECRET, {
-//     expiresIn: ACCESS_TOKEN_EXPIRES_IN,
-//   });
-// };
-
-// // Generate Refresh Token
-// export const generateRefreshToken = (userId: string): string => {
-//   return jwt.sign({ userId }, REFRESH_TOKEN_SECRET, {
-//     expiresIn: REFRESH_TOKEN_EXPIRES_IN,
-//   });
-// };
-
-// // Verify Access Token
-// export const verifyAccessToken = (token: string): { userId: string } => {
-//   try {
-//     return jwt.verify(token, ACCESS_TOKEN_SECRET) as { userId: string };
-//   } catch (error) {
-//     throw new Error("Invalid access token");
-//   }
-// };
-
-// // Verify Refresh Token
-// export const verifyRefreshToken = (token: string): { userId: string } => {
-//   try {
-//     return jwt.verify(token, REFRESH_TOKEN_SECRET) as { userId: string };
-//   } catch (error) {
-//     throw new Error("Invalid refresh token");
-//   }
-// };

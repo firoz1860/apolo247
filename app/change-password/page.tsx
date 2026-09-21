@@ -25,7 +25,7 @@ export default function ChangePasswordPage() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token'); // Or wherever you store your JWT
+      const token = localStorage.getItem('authtoken');
 
       if (!token) {
         setError('You must be logged in to change password.');
@@ -33,7 +33,7 @@ export default function ChangePasswordPage() {
         return;
       }
 
-      const res = await fetch('/api/change-password', {
+      const res = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

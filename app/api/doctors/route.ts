@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db/dbConnect';
 import Doctor, { IDoctor } from '@/lib/db/models/Doctor';
+import { requireAuth } from '@/lib/auth/requireAuth';
 
 // GET handler to fetch doctors with filters and pagination
 export async function GET(request: NextRequest) {
@@ -125,9 +126,13 @@ export async function GET(request: NextRequest) {
 // POST handler to add a new doctor
 export async function POST(request: NextRequest) {
   try {
+    // Mutations require authentication.
+    const auth = requireAuth(request);
+    if (auth.error) return auth.error;
+
     // Connect to database
     await dbConnect();
-    
+
     // Parse request body
     const data = await request.json();
     

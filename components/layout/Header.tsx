@@ -21,26 +21,68 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [location, setLocation] = useState("Delhi");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userName, setUserName] = useState<string>("");
   const pathname = usePathname();
 
   useEffect(() => {
     const token = localStorage.getItem("authtoken");
-    if(!token){
+    if (!token) {
       setIsAuthenticated(false);
+      setUserName("");
       return;
     }
-    setIsAuthenticated(true);
+
+    let cancelled = false;
+
+    // Validate the token and load the current user's profile.
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (cancelled) return;
+
+        if (res.ok) {
+          const result = await res.json();
+          setIsAuthenticated(true);
+          setUserName(result?.data?.name || "");
+        } else {
+          // Token is missing/expired/invalid — clear it.
+          localStorage.removeItem("authtoken");
+          setIsAuthenticated(false);
+          setUserName("");
+        }
+      } catch {
+        // Network error: keep the optimistic authenticated state so the UI
+        // does not flicker to logged-out on transient failures.
+        if (!cancelled) setIsAuthenticated(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [pathname]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore network errors; we clear client state regardless.
+    }
     localStorage.removeItem("authtoken");
     setIsAuthenticated(false);
-    window.location.href = "/"; // Refresh to update UI
+    setUserName("");
+    window.location.href = "/"; // Full reload to reset UI state
   };
 
   const specialties = [
     { label: "Cardiology", href: "/specialties/cardiology" },
-    { label: "General Physician", href: "//specialties/general-physician" },
+    {
+      label: "General Physician",
+      href: "/specialties/general-physician-internal-medicine",
+    },
     { label: "Dentistry", href: "/specialties/dentistry" },
     { label: "Neurology", href: "/specialties/neurology" },
     { label: "Orthopedics", href: "/specialties/orthopedics" },
@@ -258,7 +300,7 @@ const Header = () => {
                 </button>
                 <div className="mt-3 flex items-center text-gray-800 font-medium">
                   <User size={20} className="mr-2" />
-                  {User?.name || "User"}
+                  {userName || "User"}
                 </div>
               </>
             ) : (

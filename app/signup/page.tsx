@@ -28,13 +28,18 @@ export default function SignupPage() {
     }
 
     try {
+      const { confirmPassword, ...payload } = formData;
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error('Signup failed');
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Signup failed');
+      }
 
       router.push('/login');
     } catch (e: unknown) {
