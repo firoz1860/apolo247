@@ -49,8 +49,11 @@ Delivered as one PR per subsystem, stacked in dependency order.
   UI on the doctor detail page
 - ✅ **Order & booking history** — `/orders` lists pharmacy orders and lab
   bookings
-- ⬜ Order/lab-booking cancellation from the history page
-- ⬜ Wire `FilterSidebar` / `SortOptions` to real query params end-to-end
+- ✅ Order/lab-booking cancellation from the history page
+  (`PATCH /api/orders/:id`, `PATCH /api/lab-bookings/:id`)
+- ✅ Wire `FilterSidebar` / `SortOptions` to real query params end-to-end
+  (added `minRating` to the doctors API; `/find-doctors` now lists all
+  specialties so the filters apply broadly)
 - ⬜ Email-based password reset (separate from change-password)
 - ⬜ Persist auth as httpOnly cookie only (drop localStorage) and read it
       server-side for a consistent session model

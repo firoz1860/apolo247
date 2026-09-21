@@ -142,7 +142,7 @@ export default function DoctorListing({ specialty = 'General Physician' }: Docto
                 <div className="flex items-center">
                   <Stethoscope className="text-apollo-blue mr-2" size={20} />
                   <h2 className="text-lg font-semibold">
-                    {specialty} Specialists 
+                    {specialty ? `${specialty} Specialists` : 'All Doctors'}
                     <span className="text-gray-500 text-sm ml-2">
                       ({doctors.length} doctors)
                     </span>

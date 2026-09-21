@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Package, FlaskConical, Loader2, ShoppingBag } from 'lucide-react';
 
@@ -41,39 +41,61 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [needsLogin, setNeedsLogin] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState<string | null>(null);
 
-  useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('authtoken') : null;
+  const getToken = () =>
+    typeof window !== 'undefined' ? localStorage.getItem('authtoken') : null;
+
+  const load = useCallback(async () => {
+    const token = getToken();
     if (!token) {
       setNeedsLogin(true);
       setLoading(false);
       return;
     }
     const headers = { Authorization: `Bearer ${token}` };
-    (async () => {
-      try {
-        const [ordersRes, labRes] = await Promise.all([
-          fetch('/api/orders', { headers }),
-          fetch('/api/lab-bookings', { headers }),
-        ]);
-        if (ordersRes.status === 401 || labRes.status === 401) {
-          setNeedsLogin(true);
-          return;
-        }
-        const ordersData = await ordersRes.json();
-        const labData = await labRes.json();
-        if (ordersData.success) setOrders(ordersData.data);
-        if (labData.success) setLabBookings(labData.data);
-        if (!ordersData.success && !labData.success) {
-          setError('Failed to load your orders.');
-        }
-      } catch {
-        setError('Failed to load your orders. Please try again.');
-      } finally {
-        setLoading(false);
+    try {
+      const [ordersRes, labRes] = await Promise.all([
+        fetch('/api/orders', { headers }),
+        fetch('/api/lab-bookings', { headers }),
+      ]);
+      if (ordersRes.status === 401 || labRes.status === 401) {
+        setNeedsLogin(true);
+        return;
       }
-    })();
+      const ordersData = await ordersRes.json();
+      const labData = await labRes.json();
+      if (ordersData.success) setOrders(ordersData.data);
+      if (labData.success) setLabBookings(labData.data);
+      if (!ordersData.success && !labData.success) {
+        setError('Failed to load your orders.');
+      }
+    } catch {
+      setError('Failed to load your orders. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const cancel = async (url: string, id: string) => {
+    const token = getToken();
+    if (!token) return;
+    setCancelling(id);
+    try {
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: 'cancel' }),
+      });
+      if (res.ok) await load();
+    } finally {
+      setCancelling(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -149,9 +171,17 @@ export default function OrdersPage() {
                           </li>
                         ))}
                       </ul>
-                      <div className="border-t mt-2 pt-2 flex justify-between font-medium">
-                        <span>Total</span>
-                        <span className="text-apollo-blue">₹{order.totalAmount}</span>
+                      <div className="border-t mt-2 pt-2 flex justify-between items-center">
+                        <span className="font-medium">Total: <span className="text-apollo-blue">₹{order.totalAmount}</span></span>
+                        {order.status === 'placed' && (
+                          <button
+                            onClick={() => cancel(`/api/orders/${order._id}`, order._id)}
+                            disabled={cancelling === order._id}
+                            className="text-sm px-3 py-1 rounded border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                          >
+                            {cancelling === order._id ? 'Cancelling…' : 'Cancel'}
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -166,16 +196,27 @@ export default function OrdersPage() {
                 </h2>
                 <div className="space-y-3">
                   {labBookings.map((booking) => (
-                    <div key={booking._id} className="bg-white rounded-lg shadow-sm p-4 flex justify-between items-center">
+                    <div key={booking._id} className="bg-white rounded-lg shadow-sm p-4 flex justify-between items-center gap-4">
                       <div>
                         <p className="font-medium text-gray-800">{booking.testName}</p>
                         <p className="text-xs text-gray-500">Collection: {booking.date}</p>
                       </div>
-                      <div className="text-right">
-                        <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${statusBadge(booking.status)}`}>
-                          {booking.status}
-                        </span>
-                        <p className="text-sm font-medium text-apollo-blue mt-1">₹{booking.price}</p>
+                      <div className="text-right flex items-center gap-3">
+                        <div>
+                          <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${statusBadge(booking.status)}`}>
+                            {booking.status}
+                          </span>
+                          <p className="text-sm font-medium text-apollo-blue mt-1">₹{booking.price}</p>
+                        </div>
+                        {booking.status === 'booked' && (
+                          <button
+                            onClick={() => cancel(`/api/lab-bookings/${booking._id}`, booking._id)}
+                            disabled={cancelling === booking._id}
+                            className="text-sm px-3 py-1 rounded border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                          >
+                            {cancelling === booking._id ? '…' : 'Cancel'}
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}

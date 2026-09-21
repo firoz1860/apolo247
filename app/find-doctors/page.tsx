@@ -17,7 +17,7 @@ export default function FindDoctorsPage() {
         </div>
       </section>
 
-      <DoctorListing />
+      <DoctorListing specialty="" />
     </main>
   );
 }

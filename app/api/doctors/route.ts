@@ -43,7 +43,13 @@ export async function GET(request: NextRequest) {
     if (maxFee) {
       filter['clinics.consultationFee'] = { $lte: parseInt(maxFee) };
     }
-    
+
+    // Minimum rating filter
+    const minRating = searchParams.get('minRating');
+    if (minRating) {
+      filter.rating = { $gte: parseFloat(minRating) };
+    }
+
     // Availability filter (online/in-person)
     const isOnline = searchParams.get('isOnline');
     if (isOnline) {
