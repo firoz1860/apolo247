@@ -188,6 +188,18 @@ const Header = () => {
               >
                 Health Records
               </Link>
+              <Link
+                href="/orders"
+                className="text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
+              >
+                Orders
+              </Link>
+              <Link
+                href="/profile"
+                className="text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
+              >
+                Profile
+              </Link>
             </nav>
           )}
 
@@ -286,6 +298,20 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Health Records
+              </Link>
+              <Link
+                href="/orders"
+                className="block text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Orders
+              </Link>
+              <Link
+                href="/profile"
+                className="block text-apollo-blue font-medium hover:text-apollo-lightBlue transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Profile
               </Link>
             </>
           ) : (
